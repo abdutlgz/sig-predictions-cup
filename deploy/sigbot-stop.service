@@ -1,0 +1,6 @@
+[Unit]
+Description=Stop the election bot after the trading deadline
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'touch /root/SIG_Competition/data/STOP; sleep 90; systemctl disable --now sigbot-election'

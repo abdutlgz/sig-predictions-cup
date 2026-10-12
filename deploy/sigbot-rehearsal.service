@@ -1,0 +1,7 @@
+[Unit]
+Description=Election-night rehearsal (dry run) + Polymarket mapping refresh
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/SIG_Competition
+ExecStart=/bin/sh -c 'python3 -m sigcup.pmfeed > data/rehearsal_2026-10-28.log 2>&1; python3 -m sigcup.rehearse --loops 6 >> data/rehearsal_2026-10-28.log 2>&1'

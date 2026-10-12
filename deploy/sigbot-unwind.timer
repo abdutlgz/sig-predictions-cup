@@ -1,0 +1,9 @@
+[Unit]
+Description=Hourly CO-08 hedge unwind attempt (only at or above cost)
+
+[Timer]
+OnCalendar=hourly
+Unit=sigbot-unwind.service
+
+[Install]
+WantedBy=timers.target

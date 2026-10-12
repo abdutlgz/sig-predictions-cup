@@ -1,0 +1,13 @@
+[Unit]
+Description=SIG Predictions Cup bot (ELECTION NIGHT mode)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/root/SIG_Competition
+ExecStart=/bin/sh -c 'exec python3 -u -m sigcup.bot --mode election --live >> data/bot_election.log 2>&1'
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

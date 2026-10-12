@@ -1,0 +1,6 @@
+[Unit]
+Description=Switch SIG bot to election-night mode
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh /root/SIG_Competition/deploy/switch_to_election.sh

@@ -1,0 +1,9 @@
+[Unit]
+Description=Trading deadline passed: Wed Nov 4 2026, 12:01pm EST
+
+[Timer]
+OnCalendar=2026-11-04 17:01:00 UTC
+Unit=sigbot-stop.service
+
+[Install]
+WantedBy=timers.target

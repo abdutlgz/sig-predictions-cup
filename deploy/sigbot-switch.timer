@@ -1,0 +1,9 @@
+[Unit]
+Description=Election night switch: Tue Nov 3 2026, 5:45pm EST (first polls close 6pm ET in KY/IN)
+
+[Timer]
+OnCalendar=2026-11-03 22:45:00 UTC
+Unit=sigbot-switch.service
+
+[Install]
+WantedBy=timers.target

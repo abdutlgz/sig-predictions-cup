@@ -1,0 +1,7 @@
+[Unit]
+Description=Try to sell the CO-08 hedge at or above cost
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/SIG_Competition
+ExecStart=/bin/sh -c 'echo "$(date -u)" >> data/unwind.log; python3 -m sigcup.unwind "CO-08 House race" --min-sets 1000 --live >> data/unwind.log 2>&1'
