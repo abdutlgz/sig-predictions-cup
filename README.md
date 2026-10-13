@@ -4,10 +4,10 @@ An automated trading system for the [Susquehanna (SIG) Predictions Cup](https://
 
 The project covers the full loop: **market research → backtesting → a live multi-strategy bot on a cloud server → an automated election-night mode.**
 
-## Results so far (Oct 12)
+## Results so far (Oct 13)
 | | |
 |---|---|
-| Expected profit at settlement (Polymarket fair value) | **+8,400** on a 100,000 start |
+| Expected profit at settlement (Polymarket fair value) | **+1,600** on a 100,000 start (was +8,400 before a −6.7k buy/sell-loop bug on Oct 13, now fixed: [details](docs/STRATEGIES.md#incident-buysell-loop-oct-1213-67k)) |
 | Risk-free arbitrage locked in | ~+1,300 |
 | Leaderboard | ~top 30% by mark-to-market; expected finish above the top-10% line (+5.8k) |
 | Infrastructure | Google Cloud e2-micro (free tier), systemd service + scheduled election-night switch |

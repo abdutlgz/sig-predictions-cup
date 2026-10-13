@@ -105,7 +105,20 @@ See [ARCHITECTURE.md](ARCHITECTURE.md#election-night-mode). It was rehearsed aga
 - **Rehearsal 4:** cash was spent on pre-results mispricings → now only markets that moved ≥5 pts since the switch
 - **Rehearsal 5:** cash-ins fired on unconfirmed moves → now they wait for confirmation; the 12k cap applies per race
 
+## Incident: buy/sell loop (Oct 12–13, −6.7k)
+- **What happened:** the `pairs` strategy built its list of two-party races once, at startup.
+  - Once the new speed ranking (Oct 12) pushed `taker` into close races (Kansas Senate, FL-09, Michigan Senate), `taker` bought one side.
+  - `pairs` saw a "half-filled pair" and **sold it to repair the imbalance**, then `taker` bought it again.
+- **Cost:** 1,342 round trips overnight × the ~0.7-pt spread = **−6,734** (Kansas −4,012, FL-09 −2,659, Michigan −63). Found at the next check-in.
+- **Fix:**
+  1. `pairs` re-checks market ownership every loop and never touches a race another strategy trades.
+  2. **Anti-churn guard:** a market traded more than 6× in 6 hours gets no new buys (12× on election night).
+  3. **Global brake:** all new buys pause if the bot trades more than 60×/hour (300 on election night).
+
+  The bug was reproduced offline and the fix verified before restarting.
+
 ## Lessons
+0. **Any two automated rules that can undo each other will loop.** Rate-limit trades per market, and check that trading counts look sane at every review.
 1. Measure **return per day on capital**, not total P&L. Cash, not ideas, was the bottleneck.
 2. Test the **current** regime separately; the opening-chaos data made several dead strategies look brilliant.
 3. Value the account two ways: **SIG mark-to-market** (what the leaderboard shows) and **fair value** (what settlement pays). They differed by 5–8k most of the time.

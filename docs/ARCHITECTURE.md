@@ -29,6 +29,7 @@ Every `interval` seconds (20 s daily, 2 s on election night):
 - **Atomic pairs:** both legs of a hedge go in one multi-leg order (all or nothing).
 - **Price floors:** the hedge unwinder ([`unwind.py`](../sigcup/unwind.py)) sells only if total proceeds ≥ cost.
 - **Caps:** per-market (2k daily / 12k per race on election night), per-strategy budgets, cash reserve.
+- **Anti-churn:** max 6 trades per market per 6 h and a 60-trades/hour global brake (12 / 300 on election night) block new buys. This was added after a buy/sell loop between two strategies cost 6.7k (see STRATEGIES.md).
 - **Connection loss:** after 2 failed loops in a row, resting quotes are pulled until data is back.
 
 ## Election-night mode

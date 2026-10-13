@@ -60,6 +60,8 @@ class Config:
     maker_size: float = 400      # maker: cash per quote
     maker_markets: int = 10      # maker: how many markets to quote
     max_gap: float = 0.35        # ignore |SIG - fair| above this (likely bad mapping) unless overridden
+    max_trades_6h: int = 6       # anti-churn: a market traded more than this in 6 hours gets no new buys
+    max_trades_1h: int = 60      # anti-churn: all new buys pause if the bot trades more than this per hour
     exits: bool = True
     budgets: Optional[Dict[str, float]] = None  # per-strategy cost caps; default = capital split equally
     pair_min_edge: float = 0.01      # pairs: open when sum(YES bids) >= 1 + this
@@ -93,7 +95,7 @@ PRESETS = {
     "election": Config(entry=0.04, min_fill_edge=0.02, exit_band=0.01, size=3000, max_per_market=12000,
                        cash_reserve=0, interval=2, max_gap=0.95, strategies=("taker",), max_spread=0.10,
                        confirm_loops=2, edge_scaling=True, manage_all=True, decided_sell=0.95,
-                       require_move=0.05),
+                       require_move=0.05, max_trades_6h=12, max_trades_1h=300),
 }
 
 
@@ -147,6 +149,8 @@ class Bot:
         self.spike_universe: Optional[list] = None
         self.spike_entries: Dict[str, float] = _load(DATA / "spike_entries.json", {})
         self.seen: Dict[Tuple[str, str], int] = {}       # taker: consecutive loops an edge was seen
+        self.trade_times: Dict[str, list] = {}            # anti-churn: recent trade timestamps per market
+        self.churn_warned: Set[str] = set()
         self.fair_hook = None                            # rehearsal: fn(loop, fair) injecting fake moves
         self.pool = ThreadPoolExecutor(max_workers=4)
         self.base_fair: Dict[str, float] = _load(BASELINE, {}) if (live and cfg.require_move) else {}
@@ -191,7 +195,32 @@ class Bot:
                  "title": title, "exchange": ex, "action": action, "side": side, "qty": filled,
                  "cost": res.get("totalCost"), "fair": round(fair, 4)})
 
+    def note_trade(self, ex: str, res: Optional[dict]) -> None:
+        if res and res.get("quantityTraded"):
+            self.trade_times.setdefault(ex, []).append(time.time())
+
+    def churning(self, ex: str) -> bool:
+        """True if this market traded too often recently -- blocks new buys (stops any buy/sell loop)."""
+        recent = [t for t in self.trade_times.get(ex, []) if t > time.time() - 6 * 3600]
+        self.trade_times[ex] = recent
+        last_hour = sum(1 for ts in self.trade_times.values() for t in ts if t > time.time() - 3600)
+        if last_hour > self.cfg.max_trades_1h:  # global brake: something is looping somewhere
+            if "*" not in self.churn_warned:
+                self.churn_warned.add("*")
+                print(f"  !! CHURN GUARD: {last_hour} trades in the last hour -- all new buys paused")
+            return True
+        self.churn_warned.discard("*")
+        if len(recent) >= self.cfg.max_trades_6h:
+            if ex not in self.churn_warned:
+                self.churn_warned.add(ex)
+                print(f"  !! CHURN GUARD: {self.pm_map.get(ex, {}).get('title', ex)} traded {len(recent)}x in 6h"
+                      f" -- no new buys there for now")
+            return True
+        return False
+
     def buy(self, kind: str, ex: str, side: str, fair: float, budget: float, max_price: float, **extra) -> None:
+        if self.churning(ex):
+            return
         res = None
         if self.live:
             try:
@@ -199,6 +228,7 @@ class Bot:
             except ApiError as e:
                 print(f"  ! {kind} {ex}: {e}")
                 return
+        self.note_trade(ex, res)
         self.say(kind, ex, side, "buy", fair, res, budget=round(budget), max_price=max_price, **extra)
 
     def sell(self, kind: str, ex: str, side: str, fair: float, qty: int, min_price: float) -> float:
@@ -212,6 +242,7 @@ class Bot:
             except ApiError as e:
                 print(f"  ! {kind} {ex}: {e}")
                 return 0.0
+        self.note_trade(ex, res)
         self.say(kind, ex, side, "sell", fair, res, qty=qty, min_price=min_price)
         return float(res.get("totalCost") or 0) if res else qty * min_price
 
@@ -421,6 +452,7 @@ class Bot:
                         pass
         results = (res or {}).get("results") or [None] * len(legs)
         for leg, f, r in zip(legs, fairs, results):
+            self.note_trade(leg["exchangeId"], (r or {}).get("data"))
             self.say(kind, leg["exchangeId"], leg["side"], leg["action"], f if f is not None else float("nan"),
                      (r or {}).get("data"), qty=leg["quantity"], price=leg.get("price"))
 
@@ -432,6 +464,8 @@ class Bot:
                            and all(self.owners.get(e, "pairs") == "pairs" for e in g.exchange_ids)]
         for g in self.groups:
             ids = g.exchange_ids
+            if any(self.owners.get(i, "pairs") != "pairs" for i in ids):
+                continue  # another strategy trades this race now -- never touch its positions
             qs = [quotes.get(i) or {} for i in ids]
             hs = [held.get(i) for i in ids]
             fs = [fair.get(i) for i in ids]
@@ -464,7 +498,7 @@ class Bot:
                 continue
             lad = [[(l["price"], l["quantity"]) for l in self.c.orderbook(i)["bids"]] for i in ids]
             sets, profit, cost, worst = walk_sets(lad, cfg.pair_min_edge, budget, buy_no=True)
-            if cost < 100 or not all(self.own(i, "pairs") for i in ids):
+            if cost < 100 or any(self.churning(i) for i in ids) or not all(self.own(i, "pairs") for i in ids):
                 continue
             self.multi("PAIR", [self.c.leg(i, "no", "buy", sets, on_tick(1 - w)) for i, w in zip(ids, worst)], fs)
             spent += cost
