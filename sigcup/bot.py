@@ -36,6 +36,10 @@ from .fill import take
 from .pmfeed import build_map, fair_values
 
 DATA = ROOT / "data"
+# Slow counts (mail ballots / ranked choice) or a Georgia runoff (Dec 1): cash put there on election
+# night can stay stuck for days, so election mode demands a bigger edge (slow_entry).
+SLOW_RACES = ("Alaska", "California", "CA-", "Maine", "ME-", "Washington", "WA-", "Arizona", "AZ-",
+              "Nevada", "NV-", "Georgia")
 OVERRIDES = DATA / "overrides.json"
 STOP = DATA / "STOP"
 LOG = DATA / "bot_trades.csv"
@@ -62,6 +66,7 @@ class Config:
     max_gap: float = 0.35        # ignore |SIG - fair| above this (likely bad mapping) unless overridden
     max_trades_6h: int = 6       # anti-churn: a market traded more than this in 6 hours gets no new buys
     max_trades_1h: int = 60      # anti-churn: all new buys pause if the bot trades more than this per hour
+    slow_entry: float = 0.0      # election: min edge in slow-count / runoff races (cash stuck for days)
     exits: bool = True
     budgets: Optional[Dict[str, float]] = None  # per-strategy cost caps; default = capital split equally
     pair_min_edge: float = 0.01      # pairs: open when sum(YES bids) >= 1 + this
@@ -92,10 +97,10 @@ PRESETS = {
                     cash_reserve=2000, interval=20, strategies=("pairs", "spike"),
                     budgets={"pairs": 5000, "spike": 4000},
                     rank_by_speed=True, entry_close=0.03, kalshi_confirm=True),
-    "election": Config(entry=0.04, min_fill_edge=0.02, exit_band=0.01, size=3000, max_per_market=12000,
+    "election": Config(entry=0.04, min_fill_edge=0.02, exit_band=0.01, size=5000, max_per_market=40000,
                        cash_reserve=0, interval=2, max_gap=0.95, strategies=("taker",), max_spread=0.10,
-                       confirm_loops=2, edge_scaling=True, manage_all=True, decided_sell=0.95,
-                       require_move=0.05, max_trades_6h=12, max_trades_1h=300),
+                       confirm_loops=2, edge_scaling=True, manage_all=True, decided_sell=0.93,
+                       require_move=0.05, max_trades_6h=12, max_trades_1h=300, slow_entry=0.10),
 }
 
 
@@ -355,6 +360,8 @@ class Bot:
             q = quotes.get(ex) or {}
             bid, ask = q.get("bestBid"), q.get("bestAsk")
             entry = cfg.entry_close if cfg.entry_close and abs(f - 0.5) <= 0.2 else cfg.entry
+            if cfg.slow_entry and any(k in self.race_of.get(ex, "") for k in SLOW_RACES):
+                entry = max(entry, cfg.slow_entry)
             if ask is not None and f - ask >= entry:
                 cands.append((f - ask, ex, "yes", f))
             if bid is not None and bid - f >= entry:

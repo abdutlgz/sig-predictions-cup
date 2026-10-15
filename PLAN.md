@@ -1,5 +1,9 @@
 # SIG Predictions Cup: Plan v2 (Oct 12 → Nov 4)
 
+> **Oct 15 update: aggressive mode.** After the −6.7k loop bug (rank ~1,360/1,626) the user chose maximum aggression. Top 3 (+810k) is out of reach (the best single bet pays ~6×).
+> - Sold 22 safe-seat positions (63.3k, −5.7k vs fair) and bet **64.4k on "Democrats keep the U.S. Senate"** (111,225 YES sh, avg 0.579, fair 0.635, ~+10% EV): about +46.8k if it wins (rank ~40), −64.4k if not.
+> - Election mode raised to maximum: 5k trades (2× for big gaps), 40k per race, cash-ins at ≥ 0.93, and a 10-pt minimum edge in slow-count / runoff races.
+
 _Updated 2026-10-12. Replaces the Oct 6 plan. Tools: see README.md._
 
 ## Where we stand

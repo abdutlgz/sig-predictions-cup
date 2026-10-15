@@ -97,6 +97,14 @@ Dates are 2026. "Fair value" is Polymarket's mid-price for the same race. P&L is
 
 **Placed Oct 8:** a Republican wave, 3k across CO-03, NY-17, Vermont Governor, Texas Governor, ME-02, FL-13, AL-02 and Maine Senate. +7.1% expected; 1.7× if that party has a good night, ~0 if not. Held to election night; election mode rescues value from any wave bet whose race is clearly lost.
 
+## 7b. Big bet: Democrats keep the Senate (Oct 15)
+After the loop bug, the user chose maximum aggression. SIG overprices Republicans in chamber control: House R 0.16 vs fair 0.10, Senate R 0.43 vs 0.37. So the cheap, positive-EV high-variance side was **D Senate**.
+- Sold 22 safe-seat positions at the smallest haircuts (63.3k cash, −5.7k vs fair) with [`bigbet.py`](../sigcup/bigbet.py).
+- Bought **111,225 YES at avg 0.579** (fair 0.635).
+- Outcomes: ~63% → +46.8k on the bet; ~37% → −64.4k.
+
+The all-in "Republicans keep the House" jackpot (~6× at ~10%, −41% EV) was rejected. Even its best case (~rank 5) can't reach the top-3 prize line of +810k.
+
 ## 8. Election-night mode (scheduled)
 See [ARCHITECTURE.md](ARCHITECTURE.md#election-night-mode). It was rehearsed against live SIG order books with injected fake results (a swing, a one-loop flicker, a wave race going against us, a called race), and each rehearsal produced a fix:
 - **Rehearsal 1:** one strategy's market ownership blocked trades → ignored on election night
