@@ -19,7 +19,6 @@ from .pmfeed import build_map, fair_values
 
 DATA = ROOT / "data"
 SENATE = "Will the Democratic Party win the U.S. Senate?"
-SENATE_SHARES = 113000
 
 
 def sh(cmd: str) -> str:
@@ -35,7 +34,8 @@ def main() -> None:
     if active != "active":
         issues.append(f"service {svc} is {active}")
     last = sh(f"grep '^\\[' {log} | tail -1")
-    run = sh(f"awk '/Bot LIVE/{{buf=\"\"}} {{buf=buf $0 \"\\n\"}} END{{printf buf}}' {log}")
+    text = log.read_text(errors="ignore") if log.exists() else ""
+    run = text[text.rfind("Bot LIVE"):] if "Bot LIVE" in text else text  # current run only
     errors = run.count("loop error")
     churn_lines = run.count("CHURN GUARD")
     timers = int(sh("systemctl list-timers --all --no-pager | grep -c sigbot") or 0)
@@ -55,6 +55,9 @@ def main() -> None:
     m = build_map(c)
     fv = fair_values(m)
     e = next(x for x, v in m.items() if v["title"] == SENATE)
+    e_r = next(x for x, v in m.items() if v["title"] == SENATE.replace("Democratic", "Republican"))
+    pos = {pp["exchangeId"]: pp["quantity"] for pp in c.positions()["positions"]}
+    shares = max(pos.get(e, 0), 0) + max(-pos.get(e_r, 0), 0)  # YES on D + NO on R = same bet
     q = c.prices([e])[e]
     p = fv.get(e)
     rep = sh("python3 -m sigcup.botreport")
@@ -72,7 +75,7 @@ def main() -> None:
     if fp.exists():
         y = json.loads(fp.read_text())
         d = today["expected_pnl_fair"] - y["expected_pnl_fair"]
-        s = (p - y["senate_d_prob"]) * SENATE_SHARES
+        s = (p - y["senate_d_prob"]) * shares
         change = f"since {y['date']}: expected P&L {d:+,.0f} (Senate odds explain {s:+,.0f}, other {d - s:+,.0f})"
         if d - s < -1500:
             issues.append(f"expected P&L fell {d - s:,.0f} beyond the Senate-odds move")
@@ -85,7 +88,7 @@ def main() -> None:
     print(f"account: SIG {today['account_sig']:,.0f} | expected P&L at fair {today['expected_pnl_fair']:+,.0f}"
           f" | cash {today['cash']:,.0f} | rank {today['rank']} of {today['total']}"
           f" | top10% {today['top10']:+,.0f} top5% {today['top5']:+,.0f}")
-    print(f"senate bet: Polymarket {p:.3f} | SIG {q['bestBid']}/{q['bestAsk']} (paid 0.579)")
+    print(f"senate bet: {shares:,.0f} shares | Polymarket {p:.3f} | SIG {q['bestBid']}/{q['bestAsk']} (paid 0.579)")
     if change:
         print(change)
 
