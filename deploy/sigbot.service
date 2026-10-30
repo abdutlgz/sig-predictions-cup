@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 WorkingDirectory=/root/SIG_Competition
 # Same command as on the Mac; output goes to data/bot_multi.log
-ExecStart=/bin/sh -c 'exec python3 -u -m sigcup.bot --mode multi --strategies pairs,taker --budgets pairs=0,taker=40000 --cash-reserve 18000 --live >> data/bot_multi.log 2>&1'
+ExecStart=/bin/sh -c 'exec python3 -u -m sigcup.bot --mode multi --strategies pairs,taker --budgets pairs=0,taker=40000 --cash-reserve 28700 --live >> data/bot_multi.log 2>&1'
 # Restart after crashes, but NOT after the kill switch (touch data/STOP exits cleanly)
 Restart=on-failure
 RestartSec=30

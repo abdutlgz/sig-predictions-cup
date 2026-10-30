@@ -371,7 +371,8 @@ class Bot:
             for hx, hh in held.items():
                 r = self.race_of.get(hx, hx)
                 race_cost[r] = race_cost.get(r, 0.0) + hh["cost"]
-        keys = {(ex, side) for _, ex, side, _ in cands}
+        # only loops after the price moved count, so a one-loop flicker can't confirm an older gap
+        keys = {(ex, side) for _, ex, side, f in cands if self.moved(ex, f)}
         self.seen = {k: self.seen.get(k, 0) + 1 for k in keys}  # edges must persist confirm_loops
         rank = (lambda c_: c_[0] * self.speed(c_[3])) if cfg.rank_by_speed else (lambda c_: c_[0])
         for edge, ex, side, f in sorted(cands, key=rank, reverse=True):
