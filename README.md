@@ -4,13 +4,17 @@ An automated trading system for the [Susquehanna (SIG) Predictions Cup](https://
 
 The project covers the full loop: **market research → backtesting → a live multi-strategy bot on a cloud server → an automated election-night mode.**
 
-## Results so far (Oct 13)
+## Results (trading closed Nov 4, 12:00pm ET; final standings pending)
 | | |
 |---|---|
-| Expected profit at settlement (Polymarket fair value) | **+1,600** on a 100,000 start (was +8,400 before a −6.7k buy/sell-loop bug on Oct 13, now fixed: [details](docs/STRATEGIES.md#incident-buysell-loop-oct-1213-67k)) |
-| Risk-free arbitrage locked in | ~+1,300 |
-| Leaderboard | ~top 30% by mark-to-market; expected finish above the top-10% line (+5.8k) |
+| Leaderboard at the close of trading | 127,475 (**+27,475**), **rank 160 of 1,966** (top 10%) |
+| Value if every market settles like Polymarket's resolutions | **≈ 148,300 (+48,300)**. The leaderboard marks winners at SIG bids of 0.70–0.90, and they pay 1.00 at settlement |
+| Still open | CO-03 (19,925 shares on the Republican, ~90% on Polymarket). If the Democrat wins, the result is ≈ +28,400 |
+| Biggest single trade | "Democrats keep the Senate": 111k shares bought at 0.579 (Oct 15). Trimmed at 0.674 and 0.740, and the rest was cashed in at 0.931 on election night |
+| Election night | 490 automated trades in 83 markets, ≈ +9k vs holding (rough estimate) |
 | Infrastructure | Google Cloud e2-micro (free tier), systemd service + scheduled election-night switch |
+
+Timeline and lessons: [docs/STRATEGIES.md](docs/STRATEGIES.md). The Oct 13 buy/sell-loop bug (−6.7k) is described [here](docs/STRATEGIES.md#incident-buysell-loop-oct-1213-67k).
 
 ## How it works
 ```
@@ -38,7 +42,7 @@ The project covers the full loop: **market research → backtesting → a live m
 | Spike catcher (resting orders far from the price) | ❌ huge in the Oct 1–3 chaos, ~0 since | [§5](docs/STRATEGIES.md#5-spike-catcher) |
 | Lead-lag (follow Polymarket's moves) | ❌ negative after costs | [§6](docs/STRATEGIES.md#6-rejected-lead-lag-gap-reversion-fade) |
 | "Wave" bet (one party across 8 close races) | 🎲 aggressive sleeve, 3k, +7% EV, 1.7× upside | [§7](docs/STRATEGIES.md#7-aggressive-wave-bet) |
-| Election-night mode | 🗓 scheduled; rehearsed against live order books | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#election-night-mode) |
+| Election-night mode | ✅ ran automatically Nov 3–4: 490 trades, ≈ +9k vs holding | [§8](docs/STRATEGIES.md#8-election-night-mode) |
 
 ## Repository layout
 | Path | What it is |
@@ -52,7 +56,7 @@ The project covers the full loop: **market research → backtesting → a live m
 | [`sigcup/rehearse.py`](sigcup/rehearse.py), [`races.py`](sigcup/races.py), [`call.py`](sigcup/call.py) | Election-night rehearsal with fake results, race board by poll-closing time, manual race calls |
 | [`sigcup/botreport.py`](sigcup/botreport.py), [`standing.py`](sigcup/standing.py) | P&L at SIG vs fair prices; leaderboard percentiles |
 | [`deploy/`](deploy/) | systemd service, election-night switch/stop/rehearsal timers, install scripts |
-| [`PLAN.md`](PLAN.md) | Current plan through Nov 4 |
+| [`PLAN.md`](PLAN.md) | The plan through Nov 4 and how it played out |
 
 ## Quick start
 ```bash

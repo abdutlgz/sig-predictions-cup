@@ -105,13 +105,28 @@ After the loop bug, the user chose maximum aggression. SIG overprices Republican
 
 The all-in "Republicans keep the House" jackpot (~6× at ~10%, −41% EV) was rejected. Even its best case (~rank 5) can't reach the top-3 prize line of +810k.
 
-## 8. Election-night mode (scheduled)
+## 7c. Safe-seat baskets (Oct 22, Oct 31)
+Close to the election, SIG priced near-certain races at 0.85–0.90 while Polymarket had them at 0.97–0.99, about three times the Oct 6 gap. Two baskets bought these: 20k in 8 races on Oct 22 (+1,861 EV) and 19,969 in 5 races on Oct 31 (+2,311 EV). Each buy was capped at fair − 5 pts. They were picked from early-closing states so election mode could cash them in to fund trades on the night. All 13 races went the expected way.
+
+**Missed chance:** on Nov 2, one player bid 0.835 for ~46k "Democrats keep the Senate" shares while Polymarket and Kalshi had 0.735. Selling everything would have added +4.4k EV and removed all Senate risk. The bid was gone by the next check. Lesson: a mispricing this large on the account's biggest position needs an alert, not a daily check.
+
+## 8. Election-night mode
 See [ARCHITECTURE.md](ARCHITECTURE.md#election-night-mode). It was rehearsed against live SIG order books with injected fake results (a swing, a one-loop flicker, a wave race going against us, a called race), and each rehearsal produced a fix:
 - **Rehearsal 1:** one strategy's market ownership blocked trades → ignored on election night
 - **Rehearsal 2:** wave bets were being sold at fair → now held until their race is decided
 - **Rehearsal 3:** decided races were cashed in for nothing → now only when a bigger edge needs the cash
 - **Rehearsal 4:** cash was spent on pre-results mispricings → now only markets that moved ≥5 pts since the switch
 - **Rehearsal 5:** cash-ins fired on unconfirmed moves → now they wait for confirmation; the 12k cap applies per race
+- **Rehearsal 6 (Oct 30):** a one-loop flicker could "confirm" an older gap → only loops after the move count
+
+**How it went (Nov 3, 5:45pm ET → Nov 4):** the timer switched modes on schedule. The bot made **490 trades in 83 markets** with 0 loop errors, and the busiest race had 25 trades (Iowa Senate sales). By a rough estimate (64 of 83 markets valued at Polymarket's latest prices) trading added **≈ +9k** compared with holding the 5:45pm positions.
+- **Best:** Iowa Senate. It bought 16,500 Democratic YES at ~0.53 right after the switch and sold them through the night at an average of 0.668, for +2.2k. Many cheap decided-race buys added more.
+- **Senate bet:** once the race was effectively decided (~9:30pm ET), the cash-in rule sold all 43,635 shares at an average of 0.931 to fund bigger gaps. That locked in +15.4k vs cost, ~3k below holding to settlement.
+- **Worst:** WI-01, −3.2k. A fair-value bet on the Republican lost.
+- **Whipsaw:** VA-05, −1.75k. Polymarket swung briefly toward the Democrat, the bot sold, and the Republican won. This is the main weakness of treating Polymarket's live price as truth.
+
+## Incident: the morning check stopped the election bot (Nov 4)
+The 8am health check had a runaway rule: create `data/STOP` if the bot traded more than 500 times in 24 hours. The threshold was set for normal days, and election night passed it, so the bot was stopped at 8:07am ET, four hours before the close. The cost was small, because cash was ~0 and no decided winner was priced at or above the 0.93 cash-in level. **Fix:** in election mode the rule now uses 3,000 trades in 24h (50 per market is unchanged). Lesson: every automated safety rule needs its thresholds reviewed for the election-night regime, not just the bot's own.
 
 ## Incident: buy/sell loop (Oct 12–13, −6.7k)
 - **What happened:** the `pairs` strategy built its list of two-party races once, at startup.
@@ -131,3 +146,5 @@ See [ARCHITECTURE.md](ARCHITECTURE.md#election-night-mode). It was rehearsed aga
 2. Test the **current** regime separately; the opening-chaos data made several dead strategies look brilliant.
 3. Value the account two ways: **SIG mark-to-market** (what the leaderboard shows) and **fair value** (what settlement pays). They differed by 5–8k most of the time.
 4. Rehearse with fake events against live data before trusting automation with the biggest night.
+5. **Monitoring is automation too.** The health check, not the bot, ended election night early.
+6. On election night the biggest gains came from cashing in decided races and recycling the cash into others that SIG still priced as uncertain.

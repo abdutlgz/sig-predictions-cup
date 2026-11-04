@@ -2,7 +2,7 @@
 
 Prints a verdict line, health, churn check, P&L, Senate bet and the change since the last check,
 and saves today's numbers to data/morning_check_last.json.  The single write action: if a buy/sell
-loop is clearly running (>50 trades in one market or >500 total in 24h), it creates data/STOP.
+loop is clearly running (>50 trades in one market, or >500 total in 24h on a normal day), it creates data/STOP.
 """
 from __future__ import annotations
 
@@ -44,10 +44,12 @@ def main() -> None:
     t["ts"] = pd.to_datetime(t.ts)
     r = t[t.ts >= pd.Timestamp.now() - pd.Timedelta(hours=24)]
     per = r.groupby("title").size().sort_values(ascending=False)
-    if len(per) and (per.iloc[0] > 50 or len(r) > 500):
+    # election night legitimately trades ~500 times across 80+ markets (Nov 4: this rule stopped the bot 4h early)
+    max_total, warn_total = (3000, 1000) if election else (500, 150)
+    if len(per) and (per.iloc[0] > 50 or len(r) > max_total):
         (DATA / "STOP").touch()
         issues.append(f"RUNAWAY LOOP: {per.iloc[0]} trades in one market / {len(r)} total -> bot STOPPED")
-    elif (len(per) and per.iloc[0] > 8) or len(r) > 150 or churn_lines:
+    elif (len(per) and per.iloc[0] > (30 if election else 8)) or len(r) > warn_total or (churn_lines and not election):
         issues.append(f"unusual trading: busiest market {per.iloc[0] if len(per) else 0}, total {len(r)}, "
                       f"churn-guard lines {churn_lines}")
 
@@ -75,7 +77,7 @@ def main() -> None:
     if fp.exists():
         y = json.loads(fp.read_text())
         d = today["expected_pnl_fair"] - y["expected_pnl_fair"]
-        s = (p - y["senate_d_prob"]) * shares
+        s = (p - y["senate_d_prob"]) * shares if p is not None and y.get("senate_d_prob") is not None else 0.0
         change = f"since {y['date']}: expected P&L {d:+,.0f} (Senate odds explain {s:+,.0f}, other {d - s:+,.0f})"
         if d - s < -1500:
             issues.append(f"expected P&L fell {d - s:,.0f} beyond the Senate-odds move")
@@ -88,7 +90,8 @@ def main() -> None:
     print(f"account: SIG {today['account_sig']:,.0f} | expected P&L at fair {today['expected_pnl_fair']:+,.0f}"
           f" | cash {today['cash']:,.0f} | rank {today['rank']} of {today['total']}"
           f" | top10% {today['top10']:+,.0f} top5% {today['top5']:+,.0f}")
-    print(f"senate bet: {shares:,.0f} shares | Polymarket {p:.3f} | SIG {q['bestBid']}/{q['bestAsk']} (paid 0.579)")
+    print(f"senate bet: {shares:,.0f} shares | Polymarket {'resolved' if p is None else f'{p:.3f}'}"
+          f" | SIG {q['bestBid']}/{q['bestAsk']} (paid 0.579)")
     if change:
         print(change)
 

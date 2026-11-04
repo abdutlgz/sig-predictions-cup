@@ -1,5 +1,13 @@
 # SIG Predictions Cup: Plan v2 (Oct 12 → Nov 4)
 
+> **Outcome (Nov 4, close of trading):** rank 160 of 1,966 on the leaderboard (+27.5k at SIG marks). It is ≈ +48.3k if every market settles like Polymarket's resolutions, with CO-03 still being counted. The goal of a top-10% finish looks met; the top 5% depends on settlement. Details are in [docs/STRATEGIES.md](docs/STRATEGIES.md#8-election-night-mode).
+
+> **Oct 31 update:** 19,969 went into 5 safe seats (OK Sen, TN Sen, WY Sen, SD Gov, HI Gov; SIG 0.85–0.90 vs fair 0.97–0.99; +2,311 EV). 8.7k cash was kept for election night. The Senate bet was held at 43,635 shares.
+
+> **Oct 30 update:** election-mode confirmation bug fixed and re-rehearsed. Sold 14,544 Senate shares at 0.740 (+2,343 vs cost).
+
+> **Oct 22 update:** 20k basket of 8 early-called safe seats (+1,861 EV).
+
 > **Oct 21 update:** the Senate odds rose to 66.5% and SIG priced the bet *above* fair value (0.68). The user chose to **sell half**: 56,509 YES at 0.6744 (+5,391 locked). They still hold ~61.7k shares (incl. NO on R).
 > - The daily bot keeps a **38k cash reserve** for election night; election mode uses all cash.
 > - Expected P&L ≈ +7.0k (top-10% line +6.2k), rank ~200/1,750.
