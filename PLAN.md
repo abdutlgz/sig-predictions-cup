@@ -1,6 +1,6 @@
 # SIG Predictions Cup: Plan v2 (Oct 12 → Nov 4)
 
-> **Outcome (Nov 4, close of trading):** rank 160 of 1,966 on the leaderboard (+27.5k at SIG marks). It is ≈ +48.3k if every market settles like Polymarket's resolutions, with CO-03 still being counted. The goal of a top-10% finish looks met; the top 5% depends on settlement. Details are in [docs/STRATEGIES.md](docs/STRATEGIES.md#8-election-night-mode).
+> **Outcome (Nov 16):** all held markets except the U.S. House have settled, and every race went our way (CO-03 included). The expected final is **+50,028, about rank 108 of 1,969 (top 6%)**. That meets the top-10% goal and misses the top 5% by ~3.5k. At the close of trading on Nov 4 we were rank 160. Details are in [docs/STRATEGIES.md](docs/STRATEGIES.md#8-election-night-mode).
 
 > **Oct 31 update:** 19,969 went into 5 safe seats (OK Sen, TN Sen, WY Sen, SD Gov, HI Gov; SIG 0.85–0.90 vs fair 0.97–0.99; +2,311 EV). 8.7k cash was kept for election night. The Senate bet was held at 43,635 shares.
 

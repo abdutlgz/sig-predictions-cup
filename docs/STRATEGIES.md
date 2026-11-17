@@ -125,6 +125,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md#election-night-mode). It was rehearsed aga
 - **Worst:** WI-01, −3.2k. A fair-value bet on the Republican lost.
 - **Whipsaw:** VA-05, −1.75k. Polymarket swung briefly toward the Democrat, the bot sold, and the Republican won. This is the main weakness of treating Polymarket's live price as truth.
 
+**Settlement (Nov 4–16):** every remaining position won, including CO-03, which was too close to call at the close of trading (we held 19,925 shares on the Republican rather than pay ~2k to hedge). The expected final is +50,028, about rank 108 of 1,969; only the U.S. House market is still waiting to settle.
+
 ## Incident: the morning check stopped the election bot (Nov 4)
 The 8am health check had a runaway rule: create `data/STOP` if the bot traded more than 500 times in 24 hours. The threshold was set for normal days, and election night passed it, so the bot was stopped at 8:07am ET, four hours before the close. The cost was small, because cash was ~0 and no decided winner was priced at or above the 0.93 cash-in level. **Fix:** in election mode the rule now uses 3,000 trades in 24h (50 per market is unchanged). Lesson: every automated safety rule needs its thresholds reviewed for the election-night regime, not just the bot's own.
 

@@ -4,12 +4,14 @@ An automated trading system for the [Susquehanna (SIG) Predictions Cup](https://
 
 The project covers the full loop: **market research → backtesting → a live multi-strategy bot on a cloud server → an automated election-night mode.**
 
-## Results (trading closed Nov 4, 12:00pm ET; final standings pending)
+## Results (as of Nov 16, 2026; one market still to settle)
 | | |
 |---|---|
-| Leaderboard at the close of trading | 127,475 (**+27,475**), **rank 160 of 1,966** (top 10%) |
-| Value if every market settles like Polymarket's resolutions | **≈ 148,300 (+48,300)**. The leaderboard marks winners at SIG bids of 0.70–0.90, and they pay 1.00 at settlement |
-| Still open | CO-03 (19,925 shares on the Republican, ~90% on Polymarket). If the Democrat wins, the result is ≈ +28,400 |
+| Expected final result | **150,028 (+50,028, +50%)**, about **rank 108 of 1,969 (top 6%)** |
+| Current leaderboard | rank 111 of 1,969. 19 of 20 held markets have settled; cash is 138,758 |
+| Still open | U.S. House: 11,270 shares on Democrats, already resolved that way on Polymarket and waiting for SIG's settlement |
+| Goals | Top 10% ✅ (line: rank 196, +27.8k). Top 5% ❌, short by ~3.5k (rank 98, +53.6k) |
+| Rank over time | ~1,360 after the Oct 13 loop bug → ~200 before election night → 160 at the close of trading → 111 as markets settled |
 | Biggest single trade | "Democrats keep the Senate": 111k shares bought at 0.579 (Oct 15). Trimmed at 0.674 and 0.740, and the rest was cashed in at 0.931 on election night |
 | Election night | 490 automated trades in 83 markets, ≈ +9k vs holding (rough estimate) |
 | Infrastructure | Google Cloud e2-micro (free tier), systemd service + scheduled election-night switch |
