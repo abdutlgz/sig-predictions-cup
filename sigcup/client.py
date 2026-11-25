@@ -9,7 +9,7 @@ from typing import Any, Iterable, Optional
 
 import requests
 
-BASE_URL = "https://sig.thesuper.market/api/v1"
+BASE_URL = "https://api.thesuper.market/api/v1"
 ROOT = Path(__file__).resolve().parent.parent
 RETRY_STATUS = {429, 500, 502, 503, 504}
 TICK = 0.005

@@ -3,7 +3,7 @@
 ## 1. SIG "Super Market" API (trading)
 Client: [`sigcup/client.py`](../sigcup/client.py)
 
-- **Base URL:** `https://sig.thesuper.market/api/v1`. The OpenAPI spec is at `/api/v1/openapi.json`, with an interactive reference at `/api/v1/docs` (available to participants; not redistributed here).
+- **Base URL:** `https://api.thesuper.market/api/v1`. The OpenAPI spec is at `/api/v1/openapi.json`, with an interactive reference at `/api/v1/docs` (available to participants; not redistributed here).
 - **Auth:** an API key created under *My Profile → API Keys* (scopes `read` + `trade`), sent as `Authorization: Bearer <key>`. It is stored in `.env` as `SIG_API_KEY`. Keys are bound to the organization, so the competition tournament is the default context. The client still passes `tournamentId` explicitly on every call.
 - **Rate limits** are per account (all keys share one budget). The client spaces requests and retries `429/5xx` with backoff, honoring `Retry-After`. Run one bot at a time.
 
